@@ -1,0 +1,36 @@
+FROM node:18.18.0-alpine as build
+
+WORKDIR /usr/application
+
+COPY . .
+
+RUN yarn install --silent
+
+RUN yarn build
+
+RUN rm -rf node_modules
+
+RUN yarn install --production --silent --ignore-scripts
+
+FROM node:18.18.0-alpine
+
+USER root
+
+LABEL organization="Unknown"
+LABEL maintainer="mauricio de moura"
+
+ENV PORT="3020"
+ENV NODE_ENV="production"
+
+WORKDIR /usr/application
+
+COPY --from=build /usr/application/node_modules ./node_modules
+COPY --from=build /usr/application/dist ./dist
+COPY --from=build /usr/application/package.json ./package.json
+COPY --from=build /usr/application/package-lock.json ./package-lock.json
+
+USER node
+
+EXPOSE $PORT
+
+ENTRYPOINT ["yarn", "start:prod"]

@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  example:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: examples
+    restart: always
+    tty: true
+    volumes:
+      - './:/usr/application'
+      - '/usr/application/node_modules'
+    environment:
+      PORT: 3020
+    ports:
+      - '3020:3020'
